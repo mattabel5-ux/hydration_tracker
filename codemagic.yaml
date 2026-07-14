@@ -1,0 +1,11 @@
+workflows:
+  ios-build:
+    name: Hydration Tracker iOS Build
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+    scripts:
+      - name: Get Flutter Packages
+        script: flutter pub get
+      - name: Build iOS App (Unsigned)
+        script: flutter build ios --release --no-codesign
