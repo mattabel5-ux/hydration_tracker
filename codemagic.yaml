@@ -3,7 +3,7 @@ workflows:
     name: Hydration Tracker iOS Build
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: "YOUR_EXACT_KEY_NAME_HERE"
+      app_store_connect: "Codemagic Build Key"
     environment:
       flutter: stable
       ios_signing:
