@@ -12,8 +12,10 @@ workflows:
     scripts:
       - name: Get Flutter Packages
         script: flutter pub get
+      - name: Set up Apple certificates
+        script: xcode-project use-profiles
       - name: Build and Sign iOS App
-        script: flutter build ipa --release
+        script: flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
     publishing:
       app_store_connect:
         auth: integration
