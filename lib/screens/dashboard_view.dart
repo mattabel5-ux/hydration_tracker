@@ -72,16 +72,16 @@ class DashboardView extends ConsumerWidget {
             ),
             circularStrokeCap: CircularStrokeCap.round,
             progressColor: Colors.blue,
-            backgroundColor: Colors.blue.withOpacity(0.15),
+            backgroundColor: Colors.blue.withValues(alpha:0.15),
           ),
 
           // 2. Status and Target Readout
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: statusColor.withOpacity(0.5), width: 2),
+              border: Border.all(color: statusColor.withValues(alpha:0.5), width: 2),
             ),
             child: Column(
               children: [
@@ -118,6 +118,31 @@ class DashboardView extends ConsumerWidget {
               const SizedBox(height: 12),
               Text('Total Refills Today: ${dailyState.refillCount}',
                   style: const TextStyle(color: Colors.grey)
+              ),
+            ],
+          ),
+
+          // 4. Supplements Logged
+          const Divider(),
+          const Text(
+            'Supplements Logged',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          // Single Combined Tracker
+          Column(
+            children: [
+              Text(
+                '${dailyState.electrolytePills}',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const Text('Salt/Potassium Capsules', style: TextStyle(color: Colors.grey)),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref.read(hydrationProvider.notifier).addElectrolytePill();
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Log Capsule'),
               ),
             ],
           ),

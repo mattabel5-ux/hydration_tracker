@@ -1,11 +1,12 @@
 class DailyHydration {
-  final String dateId; // Format: YYYY-MM-DD
+  final String dateId;
   final double goalOz;
   final double bottleSize;
-  final int firstDrinkEpoch; // Using epoch integers for easy SQLite storage
+  final int firstDrinkEpoch;
   final int bedtimeEpoch;
   final double totalDrankOz;
   final int refillCount;
+  final int electrolytePills; // The new combined variable
 
   DailyHydration({
     required this.dateId,
@@ -15,35 +16,9 @@ class DailyHydration {
     required this.bedtimeEpoch,
     required this.totalDrankOz,
     required this.refillCount,
+    required this.electrolytePills,
   });
 
-  // Converts our Dart object into a Map for SQLite
-  Map<String, dynamic> toMap() {
-    return {
-      'date_id': dateId,
-      'goal_oz': goalOz,
-      'bottle_size': bottleSize,
-      'first_drink_epoch': firstDrinkEpoch,
-      'bedtime_epoch': bedtimeEpoch,
-      'total_drank_oz': totalDrankOz,
-      'refill_count': refillCount,
-    };
-  }
-
-  // Converts a SQLite Map back into our Dart object
-  factory DailyHydration.fromMap(Map<String, dynamic> map) {
-    return DailyHydration(
-      dateId: map['date_id'],
-      goalOz: map['goal_oz'],
-      bottleSize: map['bottle_size'],
-      firstDrinkEpoch: map['first_drink_epoch'],
-      bedtimeEpoch: map['bedtime_epoch'],
-      totalDrankOz: map['total_drank_oz'],
-      refillCount: map['refill_count'],
-    );
-  }
-
-  // Essential for Riverpod: allows us to duplicate the state and change only specific fields (like adding a refill)
   DailyHydration copyWith({
     String? dateId,
     double? goalOz,
@@ -52,6 +27,7 @@ class DailyHydration {
     int? bedtimeEpoch,
     double? totalDrankOz,
     int? refillCount,
+    int? electrolytePills,
   }) {
     return DailyHydration(
       dateId: dateId ?? this.dateId,
@@ -61,6 +37,33 @@ class DailyHydration {
       bedtimeEpoch: bedtimeEpoch ?? this.bedtimeEpoch,
       totalDrankOz: totalDrankOz ?? this.totalDrankOz,
       refillCount: refillCount ?? this.refillCount,
+      electrolytePills: electrolytePills ?? this.electrolytePills,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'dateId': dateId,
+      'goalOz': goalOz,
+      'bottleSize': bottleSize,
+      'firstDrinkEpoch': firstDrinkEpoch,
+      'bedtimeEpoch': bedtimeEpoch,
+      'totalDrankOz': totalDrankOz,
+      'refillCount': refillCount,
+      'electrolytePills': electrolytePills,
+    };
+  }
+
+  factory DailyHydration.fromMap(Map<String, dynamic> map) {
+    return DailyHydration(
+      dateId: map['dateId'],
+      goalOz: map['goalOz'],
+      bottleSize: map['bottleSize'],
+      firstDrinkEpoch: map['firstDrinkEpoch'],
+      bedtimeEpoch: map['bedtimeEpoch'],
+      totalDrankOz: map['totalDrankOz'],
+      refillCount: map['refillCount'],
+      electrolytePills: map['electrolytePills'] ?? 0,
     );
   }
 }

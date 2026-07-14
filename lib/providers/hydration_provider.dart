@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/daily_hydration.dart';
 import '../database/database_helper.dart';
+import '../services/notification_service.dart';
 
 // The Notifier controls the state of our DailyHydration object
 class HydrationNotifier extends Notifier<DailyHydration?> {
@@ -18,6 +19,7 @@ class HydrationNotifier extends Notifier<DailyHydration?> {
   Future<void> loadToday() async {
     final data = await DatabaseHelper.instance.getHydration(_todayDateId);
     state = data;
+    _updateSmartNotification(); // Schedules the notification on app load
   }
 
   // 2. Sets up a new day if she hasn't entered her info yet
@@ -35,10 +37,12 @@ class HydrationNotifier extends Notifier<DailyHydration?> {
       bedtimeEpoch: bedtime.millisecondsSinceEpoch,
       totalDrankOz: 0.0,
       refillCount: 0,
+      electrolytePills: 0, // Set to 0 at the start of the day
     );
 
     await DatabaseHelper.instance.insertOrUpdateHydration(newDay);
     state = newDay;
+    _updateSmartNotification(); // Schedules the notification when starting the day
   }
 
   // 3. Adds a refill, recalculates, and saves to database
@@ -48,6 +52,19 @@ class HydrationNotifier extends Notifier<DailyHydration?> {
     final updatedDay = state!.copyWith(
       totalDrankOz: state!.totalDrankOz + state!.bottleSize,
       refillCount: state!.refillCount + 1,
+    );
+
+    await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
+    state = updatedDay; // Triggers the UI to rebuild
+    _updateSmartNotification(); // Recalculates pace and reschedules notification
+  }
+
+  // Adds a combined Salt/Potassium tablet
+  Future<void> addElectrolytePill() async {
+    if (state == null) return;
+
+    final updatedDay = state!.copyWith(
+        electrolytePills: state!.electrolytePills + 1
     );
 
     await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
@@ -69,6 +86,30 @@ class HydrationNotifier extends Notifier<DailyHydration?> {
 
     final remainingHours = (bedtimeMs - nowMs) / (1000 * 60 * 60);
     return remainingOz / remainingHours;
+  }
+
+  // 5. Smart Notification Logic
+  void _updateSmartNotification() {
+    final currentData = state;
+    if (currentData == null) return;
+
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+
+    // If the tracking window for the day has already passed, don't send nudges
+    if (nowMs >= currentData.bedtimeEpoch) {
+      NotificationService.cancelAllNotifications();
+      return;
+    }
+
+    // Grab the exact numbers she asked for
+    final drank = currentData.totalDrankOz.toStringAsFixed(0);
+    final hourlyTarget = dynamicHourlyGoal.toStringAsFixed(1);
+
+    // Format the exact message she wants to see
+    String message = "You have drank $drank oz so far. To hit your goal, aim for $hourlyTarget oz/hr the rest of the day.";
+
+    // Pass it to your notification service
+    NotificationService.scheduleNudge(message);
   }
 }
 

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-
 import '../models/daily_hydration.dart';
 import '../models/daily_symptom.dart';
 
@@ -32,23 +31,27 @@ class DatabaseHelper {
 
   // Creates the tables when the app is installed for the first time
   Future _onCreate(Database db, int version) async {
+    // Standardized to match the exact keys in DailyHydration.toMap()
     await db.execute('''
       CREATE TABLE daily_hydration(
-        date_id TEXT PRIMARY KEY,
-        goal_oz REAL,
-        bottle_size REAL,
-        first_drink_epoch INTEGER,
-        bedtime_epoch INTEGER,
-        total_drank_oz REAL,
-        refill_count INTEGER
+        dateId TEXT PRIMARY KEY,
+        goalOz REAL,
+        bottleSize REAL,
+        firstDrinkEpoch INTEGER,
+        bedtimeEpoch INTEGER,
+        totalDrankOz REAL,
+        refillCount INTEGER,
+        electrolytePills INTEGER
       )
     ''');
 
+    // Updated to include the new timestamp tracking
     await db.execute('''
       CREATE TABLE daily_symptoms(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date_id TEXT,
-        symptom_name TEXT
+        dateId TEXT NOT NULL,
+        symptomName TEXT NOT NULL,
+        timestampEpoch INTEGER NOT NULL
       )
     ''');
   }
@@ -60,7 +63,7 @@ class DatabaseHelper {
     Database db = await instance.database;
     var res = await db.query(
         'daily_hydration',
-        where: 'date_id = ?',
+        where: 'dateId = ?',
         whereArgs: [dateId]
     );
 
@@ -70,7 +73,7 @@ class DatabaseHelper {
     return null;
   }
 
-  // Inserts new data, or overwrites it if the date_id already exists
+  // Inserts new data, or overwrites it if the dateId already exists
   Future<int> insertOrUpdateHydration(DailyHydration hydration) async {
     Database db = await instance.database;
     return await db.insert(
@@ -87,7 +90,7 @@ class DatabaseHelper {
     Database db = await instance.database;
     var res = await db.query(
         'daily_symptoms',
-        where: 'date_id = ?',
+        where: 'dateId = ?',
         whereArgs: [dateId]
     );
 
@@ -102,13 +105,22 @@ class DatabaseHelper {
     return await db.insert('daily_symptoms', symptom.toMap());
   }
 
-  // Removes a symptom if she accidentally checks the wrong box
-  Future<int> deleteSymptom(String dateId, String symptomName) async {
-    Database db = await instance.database;
-    return await db.delete(
-      'daily_symptoms',
-      where: 'date_id = ? AND symptom_name = ?',
-      whereArgs: [dateId, symptomName],
+  // --- NEW HISTORY METHODS ---
+
+  // Fetches all hydration records, sorted by date (newest first)
+  Future<List<DailyHydration>> getAllHydration() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'daily_hydration',
+      orderBy: 'dateId DESC',
     );
+    return result.map((json) => DailyHydration.fromMap(json)).toList();
+  }
+
+  // Fetches all symptom records
+  Future<List<DailySymptom>> getAllSymptoms() async {
+    final db = await instance.database;
+    final result = await db.query('daily_symptoms');
+    return result.map((json) => DailySymptom.fromMap(json)).toList();
   }
 }

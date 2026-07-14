@@ -1,27 +1,31 @@
 class DailySymptom {
-  final int? id; // Nullable because SQLite will auto-increment this for us
-  final String dateId; // This links the symptom back to the daily_hydration date
+  final int? id;
+  final String dateId;
   final String symptomName;
+  final int timestampEpoch;
 
   DailySymptom({
     this.id,
     required this.dateId,
     required this.symptomName,
+    required this.timestampEpoch,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'date_id': dateId,
-      'symptom_name': symptomName,
+      'dateId': dateId,
+      'symptomName': symptomName,
+      'timestampEpoch': timestampEpoch,
     };
   }
 
   factory DailySymptom.fromMap(Map<String, dynamic> map) {
     return DailySymptom(
       id: map['id'],
-      dateId: map['date_id'],
-      symptomName: map['symptom_name'],
+      dateId: map['dateId'],
+      symptomName: map['symptomName'],
+      timestampEpoch: map['timestampEpoch'] ?? 0,
     );
   }
 }
