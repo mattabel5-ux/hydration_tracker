@@ -59,6 +59,19 @@ class HydrationNotifier extends Notifier<DailyHydration?> {
     _updateSmartNotification(); // Recalculates pace and reschedules notification
   }
 
+  // Adds a custom amount of water (e.g., from a glass instead of the main bottle)
+  Future<void> addCustomWater(double oz) async {
+    if (state == null) return;
+
+    final updatedDay = state!.copyWith(
+      totalDrankOz: state!.totalDrankOz + oz,
+    );
+
+    await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
+    state = updatedDay; // Triggers UI rebuild
+    _updateSmartNotification(); // Recalculates pace
+  }
+
   // Adds a combined Salt/Potassium tablet
   Future<void> addElectrolytePill() async {
     if (state == null) return;

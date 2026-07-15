@@ -111,6 +111,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // Only show the Symptoms button if she is actively on the Dashboard tab
         floatingActionButton: _selectedIndex == 0
             ? FloatingActionButton.extended(
+          // This shrinks the excessive side padding
+          extendedPadding: const EdgeInsets.symmetric(horizontal: 16),
+          extendedIconLabelSpacing: 8,
           onPressed: () {
             showModalBottomSheet(
               context: context,
@@ -118,8 +121,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               builder: (context) => const SymptomChecklist(),
             );
           },
-          icon: const Icon(Icons.monitor_heart),
-          label: const Text('Symptoms'),
+          icon: const Icon(Icons.monitor_heart, size: 20),
+          label: const Text('Symptoms', style: TextStyle(fontSize: 14)),
         )
             : null,
 
