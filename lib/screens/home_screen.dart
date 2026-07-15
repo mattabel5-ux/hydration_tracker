@@ -211,11 +211,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             FilledButton(
               onPressed: () {
                 if (_firstDrinkTime != null && _bedtime != null) {
+                  // NEW CODE
                   ref.read(hydrationProvider.notifier).setupDay(
                     goalOz: double.parse(_goalController.text),
                     bottleSize: double.parse(_bottleController.text),
                     firstDrink: _timeOfDayToDateTime(_firstDrinkTime!),
-                    bedtime: _timeOfDayToDateTime(_bedtime!),
+                    bedtime: _bedtimeToDateTime(_bedtime!), // <--- Now uses the new offset logic!
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
