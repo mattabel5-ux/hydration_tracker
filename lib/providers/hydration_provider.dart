@@ -71,6 +71,40 @@ class HydrationNotifier extends Notifier<DailyHydration?> {
     state = updatedDay; // Triggers the UI to rebuild
   }
 
+  // --- NEW EDIT METHODS ---
+
+  Future<void> updateGoal(double newGoal) async {
+    if (state == null) return;
+    final updatedDay = state!.copyWith(goalOz: newGoal);
+    await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
+    state = updatedDay;
+    _updateSmartNotification(); // Recalculate hourly pace
+  }
+
+  Future<void> updateBottleSize(double newSize) async {
+    if (state == null) return;
+    final updatedDay = state!.copyWith(bottleSize: newSize);
+    await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
+    state = updatedDay;
+    // Changing bottle size doesn't affect the hourly math, so no notification update needed
+  }
+
+  Future<void> updateFirstDrink(int newEpochMs) async {
+    if (state == null) return;
+    final updatedDay = state!.copyWith(firstDrinkEpoch: newEpochMs);
+    await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
+    state = updatedDay;
+    _updateSmartNotification();
+  }
+
+  Future<void> updateBedtime(int newEpochMs) async {
+    if (state == null) return;
+    final updatedDay = state!.copyWith(bedtimeEpoch: newEpochMs);
+    await DatabaseHelper.instance.insertOrUpdateHydration(updatedDay);
+    state = updatedDay;
+    _updateSmartNotification(); // Math changes drastically if bedtime changes
+  }
+
   // 4. The Math: Calculates exactly how much she needs to drink per hour right now
   double get dynamicHourlyGoal {
     if (state == null) return 0.0;
