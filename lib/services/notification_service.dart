@@ -10,11 +10,22 @@ class NotificationService {
   static Future<void> init() async {
     tz.initializeTimeZones();
 
+    // Android configuration
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
+    // iOS / Apple configuration (Fixed the white screen crash)
+    const DarwinInitializationSettings initializationSettingsDarwin =
+    DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    // Combine both configurations into the master settings
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
     );
 
     await _notificationsPlugin.initialize(
