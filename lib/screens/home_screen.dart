@@ -51,6 +51,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return DateTime(now.year, now.month, now.day, time.hour, time.minute);
   }
 
+  // --- NEW: Human Bedtime Logic for Initial Setup ---
+  DateTime _bedtimeToDateTime(TimeOfDay time) {
+    final now = DateTime.now();
+    int dayOffset = 0;
+    // If she picks between 12:00 AM and 4:59 AM, push it to tomorrow
+    if (time.hour >= 0 && time.hour < 5) {
+      dayOffset = 1;
+    }
+    return DateTime(now.year, now.month, now.day + dayOffset, time.hour, time.minute);
+  }
+
   // Handles tapping the bottom navigation bar
   void _onItemTapped(int index) {
     setState(() {
