@@ -40,12 +40,18 @@ class NotificationService {
       'instant_test_channel',
       'Instant Test Channel',
       channelDescription: 'Testing if Android will draw a banner',
-      importance: Importance.max, // Max forces a drop-down banner
+      importance: Importance.max,
       priority: Priority.max,
-      icon: '@mipmap/ic_launcher', // Explicitly defining the icon here
+      icon: '@mipmap/ic_launcher',
     );
 
-    const NotificationDetails details = NotificationDetails(android: androidDetails);
+    // --- NEW: Tell iOS to play the default notification sound ---
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
+
+    const NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails, // <-- Added here
+    );
 
     await _notificationsPlugin.show(
       888,
@@ -64,14 +70,20 @@ class NotificationService {
   static Future<void> scheduleSetupReminder() async {
     await cancelAllNotifications();
 
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'setup_reminders_v2',
+      'Setup Reminders',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    // --- NEW: Tell iOS to play the default notification sound ---
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
+
     const NotificationDetails details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'setup_reminders_v2',
-        'Setup Reminders',
-        importance: Importance.defaultImportance,
-        priority: Priority.defaultPriority,
-        icon: '@mipmap/ic_launcher', // Safety fallback
-      ),
+      android: androidDetails,
+      iOS: iosDetails, // <-- Added here
     );
 
     final now = tz.TZDateTime.now(tz.local);
@@ -107,15 +119,24 @@ class NotificationService {
 
     // We are routing the scheduled alerts through the proven test channel
     final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'instant_test_channel', // Hijacking the proven channel ID
+      'instant_test_channel',
       'Instant Test Channel',
-      importance: Importance.max, // Upgraded to MAX
-      priority: Priority.max,     // Upgraded to MAX
+      importance: Importance.max,
+      priority: Priority.max,
       fullScreenIntent: isFullScreen,
       icon: '@mipmap/ic_launcher',
     );
 
-    final NotificationDetails details = NotificationDetails(android: androidDetails);
+    // --- NEW: Tell iOS to play the default notification sound ---
+    // If she selected "Full Screen (Urgent)", we tell iOS this is a time-sensitive alert
+    final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      interruptionLevel: isFullScreen ? InterruptionLevel.timeSensitive : InterruptionLevel.active,
+    );
+
+    final NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails, // <-- Added here
+    );
 
     final now = tz.TZDateTime.now(tz.local);
     final bedtime = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.local, bedtimeEpoch);
