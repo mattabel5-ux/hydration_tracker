@@ -1,4 +1,4 @@
-package com.example.hydration_tracker
+package com.matthewabel.hydrationTracker
 
 import io.flutter.embedding.android.FlutterActivity
 

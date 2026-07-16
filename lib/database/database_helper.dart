@@ -24,14 +24,14 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // INCREMENTED TO VERSION 2
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade, // ADDED UPGRADE PATH
     );
   }
 
-  // Creates the tables when the app is installed for the first time
+  // Creates the tables when the app is installed for the very first time
   Future _onCreate(Database db, int version) async {
-    // Standardized to match the exact keys in DailyHydration.toMap()
     await db.execute('''
       CREATE TABLE daily_hydration(
         dateId TEXT PRIMARY KEY,
@@ -41,11 +41,12 @@ class DatabaseHelper {
         bedtimeEpoch INTEGER,
         totalDrankOz REAL,
         refillCount INTEGER,
-        electrolytePills INTEGER
+        electrolytePills INTEGER,
+        notificationIntervalMinutes INTEGER,
+        notificationType TEXT
       )
     ''');
 
-    // Updated to include the new timestamp tracking
     await db.execute('''
       CREATE TABLE daily_symptoms(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,9 +57,17 @@ class DatabaseHelper {
     ''');
   }
 
+  // Safely updates the database for existing users (like your daughter)
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add the new notification columns without destroying existing data
+      await db.execute("ALTER TABLE daily_hydration ADD COLUMN notificationIntervalMinutes INTEGER DEFAULT 60");
+      await db.execute("ALTER TABLE daily_hydration ADD COLUMN notificationType TEXT DEFAULT 'standard'");
+    }
+  }
+
   // --- Hydration Methods ---
 
-  // Fetches a specific day's data
   Future<DailyHydration?> getHydration(String dateId) async {
     Database db = await instance.database;
     var res = await db.query(
@@ -73,7 +82,6 @@ class DatabaseHelper {
     return null;
   }
 
-  // Inserts new data, or overwrites it if the dateId already exists
   Future<int> insertOrUpdateHydration(DailyHydration hydration) async {
     Database db = await instance.database;
     return await db.insert(
@@ -85,7 +93,6 @@ class DatabaseHelper {
 
   // --- Symptom Methods ---
 
-  // Fetches all symptoms logged on a specific day
   Future<List<DailySymptom>> getSymptoms(String dateId) async {
     Database db = await instance.database;
     var res = await db.query(
@@ -99,7 +106,6 @@ class DatabaseHelper {
         : [];
   }
 
-  // Logs a new symptom
   Future<int> insertSymptom(DailySymptom symptom) async {
     Database db = await instance.database;
     return await db.insert('daily_symptoms', symptom.toMap());
@@ -107,7 +113,6 @@ class DatabaseHelper {
 
   // --- NEW HISTORY METHODS ---
 
-  // Fetches all hydration records, sorted by date (newest first)
   Future<List<DailyHydration>> getAllHydration() async {
     final db = await instance.database;
     final result = await db.query(
@@ -117,7 +122,6 @@ class DatabaseHelper {
     return result.map((json) => DailyHydration.fromMap(json)).toList();
   }
 
-  // Fetches all symptom records
   Future<List<DailySymptom>> getAllSymptoms() async {
     final db = await instance.database;
     final result = await db.query('daily_symptoms');

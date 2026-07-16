@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/hydration_provider.dart';
+import 'notification_settings_dialog.dart';
 
 class DailyPlanView extends ConsumerWidget {
   const DailyPlanView({super.key});
@@ -64,6 +65,13 @@ class DailyPlanView extends ConsumerWidget {
           content: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
+            // --- NEW: Highlights text on tap ---
+            onTap: () {
+              controller.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: controller.text.length,
+              );
+            },
             decoration: const InputDecoration(suffixText: 'oz'),
           ),
           actions: [
@@ -131,6 +139,17 @@ class DailyPlanView extends ConsumerWidget {
             value: timeFormat.format(bedtime),
             icon: Icons.bedtime,
             onTap: selectBedtime,
+          ),
+          _buildEditableCard(
+            title: 'Notifications',
+            value: '${dailyState.notificationIntervalMinutes} min',
+            icon: Icons.notifications_active,
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) => const NotificationSettingsDialog(),
+              );
+            },
           ),
           const Spacer(),
         ],

@@ -6,7 +6,11 @@ class DailyHydration {
   final int bedtimeEpoch;
   final double totalDrankOz;
   final int refillCount;
-  final int electrolytePills; // The new combined variable
+  final int electrolytePills;
+
+  // NEW: Notification Preferences
+  final int notificationIntervalMinutes;
+  final String notificationType;
 
   DailyHydration({
     required this.dateId,
@@ -17,6 +21,8 @@ class DailyHydration {
     required this.totalDrankOz,
     required this.refillCount,
     required this.electrolytePills,
+    this.notificationIntervalMinutes = 60, // Defaults to 1 hour
+    this.notificationType = 'standard',    // Defaults to standard banner
   });
 
   DailyHydration copyWith({
@@ -28,6 +34,8 @@ class DailyHydration {
     double? totalDrankOz,
     int? refillCount,
     int? electrolytePills,
+    int? notificationIntervalMinutes,
+    String? notificationType,
   }) {
     return DailyHydration(
       dateId: dateId ?? this.dateId,
@@ -38,6 +46,8 @@ class DailyHydration {
       totalDrankOz: totalDrankOz ?? this.totalDrankOz,
       refillCount: refillCount ?? this.refillCount,
       electrolytePills: electrolytePills ?? this.electrolytePills,
+      notificationIntervalMinutes: notificationIntervalMinutes ?? this.notificationIntervalMinutes,
+      notificationType: notificationType ?? this.notificationType,
     );
   }
 
@@ -51,6 +61,8 @@ class DailyHydration {
       'totalDrankOz': totalDrankOz,
       'refillCount': refillCount,
       'electrolytePills': electrolytePills,
+      'notificationIntervalMinutes': notificationIntervalMinutes,
+      'notificationType': notificationType,
     };
   }
 
@@ -64,6 +76,9 @@ class DailyHydration {
       totalDrankOz: map['totalDrankOz'],
       refillCount: map['refillCount'],
       electrolytePills: map['electrolytePills'] ?? 0,
+      // Fallbacks prevent crashes for old database rows that lack these columns
+      notificationIntervalMinutes: map['notificationIntervalMinutes'] ?? 60,
+      notificationType: map['notificationType'] ?? 'standard',
     );
   }
 }

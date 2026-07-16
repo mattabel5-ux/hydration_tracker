@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import '../providers/hydration_provider.dart';
+import '../services/notification_service.dart';
 
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
 
-  // --- NEW: Helper method to show the manual water entry popup ---
   Future<void> _showCustomAmountDialog(BuildContext context, HydrationNotifier notifier) async {
     final controller = TextEditingController();
     await showDialog(
@@ -16,6 +16,13 @@ class DashboardView extends ConsumerWidget {
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          // Highlights text on tap
+          onTap: () {
+            controller.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: controller.text.length,
+            );
+          },
           decoration: const InputDecoration(
             labelText: 'Amount (oz)',
             suffixText: 'oz',
@@ -74,7 +81,6 @@ class DashboardView extends ConsumerWidget {
       statusColor = dailyState.totalDrankOz >= dailyState.goalOz ? Colors.green : Colors.red;
     }
 
-    // Wrapped in SingleChildScrollView so the spacing adapts to any phone screen size
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -82,7 +88,6 @@ class DashboardView extends ConsumerWidget {
           children: [
             const SizedBox(height: 16),
 
-            // 1. Goal Progress Ring
             CircularPercentIndicator(
               radius: 120.0,
               lineWidth: 20.0,
@@ -109,7 +114,6 @@ class DashboardView extends ConsumerWidget {
 
             const SizedBox(height: 32),
 
-            // 2. Status and Target Readout
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -134,7 +138,6 @@ class DashboardView extends ConsumerWidget {
 
             const SizedBox(height: 32),
 
-            // 3. Actions
             Column(
               children: [
                 SizedBox(
@@ -153,7 +156,6 @@ class DashboardView extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
 
-                // --- NEW: Refill count and Custom Add Button on the same row ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -175,7 +177,6 @@ class DashboardView extends ConsumerWidget {
             const Divider(),
             const SizedBox(height: 16),
 
-            // 4. Supplements Logged
             const Text(
               'Supplements Logged',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -199,7 +200,6 @@ class DashboardView extends ConsumerWidget {
               ],
             ),
 
-            // --- NEW: The Invisible Bumper (prevents FAB overlap) ---
             const SizedBox(height: 80),
           ],
         ),

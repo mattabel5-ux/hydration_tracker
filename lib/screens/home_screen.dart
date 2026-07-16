@@ -165,6 +165,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 30),
             TextField(
               controller: _goalController,
+              // --- NEW: Highlights text on tap ---
+              onTap: () {
+                _goalController.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: _goalController.text.length,
+                );
+              },
               decoration: const InputDecoration(
                 labelText: 'Daily Goal (oz)',
                 border: OutlineInputBorder(),
@@ -174,6 +181,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _bottleController,
+              // --- NEW: Highlights text on tap ---
+              onTap: () {
+                _bottleController.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: _bottleController.text.length,
+                );
+              },
               decoration: const InputDecoration(
                 labelText: 'Bottle Size (oz)',
                 border: OutlineInputBorder(),
